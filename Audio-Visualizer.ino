@@ -71,26 +71,26 @@ void graphBands(void)
     }
 
     /* Band colors
-     Red    ---->  63Hz
-     Yellow ---->  160Hz
-     Green  ---->  400Hz
-     Cyan   ---->  1KHz
-     Blue   ---->  2.5KHz
-     Pink   ---->  6.25KHz
-     White  ---->  16KHz
+     0    ---->  63Hz
+     1 ---->  160Hz
+     2  ---->  400Hz
+     3   ---->  1KHz
+     4   ---->  2.5KHz
+     5   ---->  6.25KHz
+     6  ---->  16KHz
     */
 
     // Set Orange
     uint32_t color = Neopixel.Color(mapValue[2], (int)(mapValue[2] / 2), 0);
-    Neopixel.fill(color, 0, 22);
+    Neopixel.fill(color, 0, 20);
 
     // Set Cyan
     //color = Neopixel.Color(0, mapValue[1], mapValue[2]);
     //Neopixel.fill(color, 12, 12);
 
     //Set Blue
-    color = Neopixel.Color(0, 0, mapValue[5]);
-    Neopixel.fill(color, 22, 22);
+    color = Neopixel.Color(0, 0, mapValue[4]);
+    Neopixel.fill(color, 20, 24);
 
     // Set Blue
     //color = Neopixel.Color(0, 0, mapValue[3]);
@@ -102,11 +102,11 @@ void graphBands(void)
 
     // Set Green
     color = Neopixel.Color(0, mapValue[6], 0);
-    Neopixel.fill(color, 44, 25);
+    Neopixel.fill(color, 44, 23);
 
     // Set Red
     color = Neopixel.Color(mapValue[0], 0, 0);
-    Neopixel.fill(color, 69, 15);
+    Neopixel.fill(color, 67, 17);
 
     Neopixel.show();
 }
