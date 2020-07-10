@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 
+const uint8_t PIN_AUDIO_IN = A0;
 const uint8_t PIN_RESET    = 31;
 const uint8_t PIN_STROBE   = 11;
-const uint8_t PIN_AUDIO_IN = A0;
 const uint8_t PIN_NEOPIXEL = 7;
 const uint8_t LED_COUNT    = 84;
 
@@ -70,35 +70,28 @@ void graphBands(void)
         }
     }
 
-    /* Band colors
-     0    ---->  63Hz
-     1 ---->  160Hz
+    /* Band Freq
+     0  ---->  63Hz
+     1  ---->  160Hz
      2  ---->  400Hz
-     3   ---->  1KHz
-     4   ---->  2.5KHz
-     5   ---->  6.25KHz
+     3  ---->  1KHz
+     4  ---->  2.5KHz
+     5  ---->  6.25KHz
      6  ---->  16KHz
     */
+
+    /*
+     * Cyan = Neopixel.Color(0, mapValue[1], mapValue[1]);
+     * Yellow = Neopixel.Color(mapValue[4], mapValue[4], 0);
+     */
 
     // Set Orange
     uint32_t color = Neopixel.Color(mapValue[2], (int)(mapValue[2] / 2), 0);
     Neopixel.fill(color, 0, 20);
 
-    // Set Cyan
-    //color = Neopixel.Color(0, mapValue[1], mapValue[2]);
-    //Neopixel.fill(color, 12, 12);
-
     //Set Blue
     color = Neopixel.Color(0, 0, mapValue[4]);
     Neopixel.fill(color, 20, 24);
-
-    // Set Blue
-    //color = Neopixel.Color(0, 0, mapValue[3]);
-    //Neopixel.fill(color, 28, 28);
-
-    // Set Yellow
-    //color = Neopixel.Color(mapValue[4], mapValue[4], 0);
-    //Neopixel.fill(color, 48, 12);
 
     // Set Green
     color = Neopixel.Color(0, mapValue[6], 0);
