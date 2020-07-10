@@ -7,6 +7,15 @@ const uint8_t PIN_STROBE   = 11;
 const uint8_t PIN_NEOPIXEL = 7;
 const uint8_t LED_COUNT    = 84;
 
+typedef eAppCmd
+{
+    MUSIC,
+    RAINBOW,
+    POWER_ON,
+    POWER_OFF,
+    BACK_LIGHT
+}eAppCmd_t
+
 // Save all 7 bands value
 uint32_t Bands[7];
 
