@@ -1,32 +1,46 @@
+/***********************************************************************
+ * @file      audio-visualizer.ino
+ * @author    Fahad Mirza (fahadmirza8@gmail.com)
+ * @version   V02.0
+ * @brief     Main Application
+ ***********************************************************************/
+/*-- Includes ---------------------------------------------------------*/
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
-#include <bluefruit.h>
-#include <Adafruit_LittleFS.h>
-#include <InternalFileSystem.h>
+#include "ble.h"
 
-const uint8_t PIN_AUDIO_IN = A0;
-const uint8_t PIN_RESET    = 31;
-const uint8_t PIN_STROBE   = 11;
-const uint8_t PIN_NEOPIXEL = 7;
-const uint8_t LED_COUNT    = 84;
+#define CMD_BUFFER_SIZE  (25U)
+#define VALID    (1U)
+#define INVALID  (0U)
 
-typedef enum eAppCmd
+/*-- Constants --------------------------------------------------------*/
+static const uint8_t PIN_AUDIO_IN = A0;
+static const uint8_t PIN_RESET    = 31;
+static const uint8_t PIN_STROBE   = 11;
+static const uint8_t PIN_NEOPIXEL = 7;
+static const uint8_t LED_COUNT    = 84;
+
+/*-- Private typedef --------------------------------------------------*/
+typedef enum eMode
 {
-    MUSIC,
-    RAINBOW,
+    MUSIC = 0,
     POWER_ON,
     POWER_OFF,
-    BACK_LIGHT
-}eAppCmd_t;
+    RAINBOW,
+    BACKLIGHT
+}eMode_t;
 
+
+/*-- Private variables ------------------------------------------------*/
 // Save all 7 bands value
-uint32_t Bands[7];
+static uint32_t Bands[7];
+char CmdBuffer[CMD_BUFFER_SIZE + 1];
 
 Adafruit_NeoPixel Neopixel(LED_COUNT, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
 
-// BLE Service
-BLEUart bleuart; // uart over ble
+eMode_t AppMode = POWER_OFF;
 
+/*-- Function definitions ---------------------------------------------*/
 void setup() 
 {    
     pinMode(PIN_RESET, OUTPUT);
@@ -50,48 +64,99 @@ void setup()
     while(!Serial) yield();
 #endif
 
-    // Setup the BLE LED to be disabled on CONNECT
-    Bluefruit.autoConnLed(false);
-    // Config the peripheral connection with maximum bandwidth 
-    // more SRAM required by SoftDevice
-    // Note: All config***() function must be called before begin()
-    Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
-
-    Bluefruit.begin();
-    Bluefruit.setTxPower(4);    // Check bluefruit.h for supported values
-    Bluefruit.setName("Illuminati");
-    Bluefruit.Periph.setConnectCallback(connect_callback);
-    Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
-    
-    // Configure and Start BLE Uart Service
-    bleuart.begin();
-
-    // Set up and start advertising
-    startAdv();
-
-    Serial.println("Ready");
+    BLE_Init();
 }
 
 void loop() 
 { 
-    // Forward from BLEUART to HW Serial
-    while ( bleuart.available() )
+    if(BLE_ProcessMsg(CmdBuffer) == VALID)
     {
-        uint8_t ch;
-        ch = (uint8_t) bleuart.read();
-        Serial.write(ch);
-    }   
+        parse_cmd(CmdBuffer);
+    }
+
+    switch(AppMode)
+    {
+        case MUSIC:
+        {
+            audio_visualizer();
+            break;
+        }
+        case RAINBOW:
+        {
+            rainbow(20);
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
 }
 
 
+static void parse_cmd(char *cmd)
+{
+    if(strncmp(cmd, "music", strlen("music")) == 0)
+    {
+        Neopixel.setBrightness(255);
+        AppMode = MUSIC;
+    }
+    else if(strncmp(cmd, "pwroff", strlen("pwroff")) == 0)
+    {
+        Neopixel.clear();
+        Neopixel.show();
+        AppMode = POWER_OFF;
+    }
+    else if(strncmp(cmd, "pwron", strlen("pwron")) == 0)
+    {
+        backlight(0); // Whatever last was used
+        AppMode = POWER_ON;
+    }
+    else if(strncmp(cmd, "rainbow", strlen("rainbow")) == 0)
+    {
+        Neopixel.setBrightness(255);
+        AppMode = RAINBOW;
+    }
+    else if(strncmp(cmd, "bl", strlen("bl")) == 0)
+    {
+        cmd += 3;
+        char *token;
+        char rgb[5];
+        uint8_t i = 0;
 
-void audio_visualizer(void)
+        token = strtok(cmd, ",");
+        while(token != NULL)
+        {
+            rgb[i++] = strtol(token, NULL, 10);
+            token = strtok(NULL, ",");
+        }
+        
+        Neopixel.setBrightness(rgb[3]);
+        backlight(Neopixel.Color(rgb[0], rgb[1], rgb[2]));
+        AppMode = BACKLIGHT;
+    }
+}
+
+void backlight(uint32_t color)
+{
+    static uint32_t backlightColor = Neopixel.Color(255, 0, 0);
+
+    if(color != 0)
+    {
+        backlightColor = color;
+    }
+    Neopixel.fill(backlightColor);
+    Neopixel.show();
+}
+
+static void audio_visualizer(void)
 {
     read_MSGEQ7(); 
     graph_bands();
 }
 
-void read_MSGEQ7(void)
+
+static void read_MSGEQ7(void)
 {
     digitalWrite(PIN_RESET, HIGH);           // Pulse the reset signal
     digitalWrite(PIN_RESET, LOW);            // Causes MSGEQ7 to latch spectrum values
@@ -109,8 +174,7 @@ void read_MSGEQ7(void)
 }
 
 
-
-void graph_bands(void)
+static void graph_bands(void)
 {
     uint8_t mapValue[7];
     
@@ -147,66 +211,43 @@ void graph_bands(void)
     Neopixel.fill(color, 20, 24);
 
     // Set Green
-    color = Neopixel.Color(0, mapValue[6], 0);
+    color = Neopixel.Color(mapValue[0], 0, 0);
     Neopixel.fill(color, 44, 23);
 
     // Set Red
-    color = Neopixel.Color(mapValue[0], 0, 0);
+    color = Neopixel.Color(0, mapValue[6], 0);
     Neopixel.fill(color, 67, 17);
 
     Neopixel.show();
 }
 
-void startAdv(void)
+
+// Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
+void rainbow(int wait) 
 {
-    // Advertising packet
-    Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
+    static long firstPixelHue = 0;
 
-    // Include bleuart 128-bit uuid
-    Bluefruit.Advertising.addService(bleuart);
+    for(uint8_t i = 0; i < Neopixel.numPixels(); i++) 
+    {
+      // Offset pixel hue by an amount to make one full revolution of the
+      // color wheel (range of 65536) along the length of the strip
+      // (strip.numPixels() steps):
+      int pixelHue = firstPixelHue + (i * 65536L / Neopixel.numPixels());
+      // strip.ColorHSV() can take 1 or 3 arguments: a hue (0 to 65535) or
+      // optionally add saturation and value (brightness) (each 0 to 255).
+      // Here we're using just the single-argument hue variant. The result
+      // is passed through strip.gamma32() to provide 'truer' colors
+      // before assigning to each pixel:
+      Neopixel.setPixelColor(i, Neopixel.gamma32(Neopixel.ColorHSV(pixelHue)));
+    }
+    
+    Neopixel.show(); // Update strip with new contents
+    delay(wait);     // Pause for a moment
 
-    // Secondary Scan Response packet (optional)
-    // Since there is no room for 'Name' in Advertising packet
-    Bluefruit.ScanResponse.addName();
-  
-    /* Start Advertising
-     * - Enable auto advertising if disconnected
-     * - Interval:  fast mode = 20 ms, slow mode = 152.5 ms
-     * - Timeout for fast mode is 30 seconds
-     * - Start(timeout) with timeout = 0 will advertise forever (until connected)
-     * 
-     * For recommended advertising interval
-     * https://developer.apple.com/library/content/qa/qa1931/_index.html   
-     */
-    Bluefruit.Advertising.restartOnDisconnect(true);
-    Bluefruit.Advertising.setInterval(32, 244);    // in unit of 0.625 ms
-    Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
-    Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds  
-}
+    firstPixelHue += 256;
 
-// callback invoked when central connects
-void connect_callback(uint16_t conn_handle)
-{
-    // Get the reference to current connection
-    BLEConnection* connection = Bluefruit.Connection(conn_handle);
-
-    char central_name[32] = { 0 };
-    connection->getPeerName(central_name, sizeof(central_name));
-
-    Serial.print("Connected to ");
-    Serial.println(central_name);
-}
-
-/**
- * Callback invoked when a connection is dropped
- * @param conn_handle connection where this event happens
- * @param reason is a BLE_HCI_STATUS_CODE which can be found in ble_hci.h
- */
-void disconnect_callback(uint16_t conn_handle, uint8_t reason)
-{
-    (void) conn_handle;
-    (void) reason;
-
-    Serial.println();
-    Serial.print("Disconnected, reason = 0x"); Serial.println(reason, HEX);
+    if(firstPixelHue >= 5*65536)
+    {
+        firstPixelHue = 0;
+    }
 }
