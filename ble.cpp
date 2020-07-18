@@ -15,15 +15,24 @@
 #define VALID    (1U)
 #define INVALID  (0U)
 
+
 /*-- Private variables ------------------------------------------------*/
 // BLE UART Service
 BLEUart bleuart; 
 
+
+/*-- Private functions ------------------------------------------------*/
 void startAdv(void);
 void connect_callback(uint16_t conn_handle);
 void disconnect_callback(uint16_t conn_handle, uint8_t reason);
 
+
 /*-- Exported functions -----------------------------------------------*/
+/************************************************************************
+ * @brief  Initialize the BLE stack
+ * @param  None
+ * @retval None
+ ***********************************************************************/
 void BLE_Init(void)
 {
     // Setup the BLE LED to be disabled on CONNECT
@@ -48,21 +57,29 @@ void BLE_Init(void)
     Serial.println("Ready");
 }
 
+
+/******************************************************************************
+ * @brief  Process incoming BLE messages
+ * @param  msgBuffer: pointer of the buffer to hold the BLE message
+ * @retval VALID: If a complete message is received
+ *         INVALID: If not
+ ******************************************************************************/
 uint8_t BLE_ProcessMsg(char *msgBuffer)
 {
     static char command[BLE_BUFFER_SIZE + 1];
     static uint8_t i = 0;
 
-    // Process commands
+    // Check if any BLE msg is available to read
     while(bleuart.available())
     {
         command[i] = (uint8_t)bleuart.read();
         //Serial.print(command[i]);
         
-        if(command[i] == '\n')
+        if(command[i] == '\n') // End of the message
         {
             if(i != 0)
             {
+                // Null terminating the msg
                 command[i] = '\0';
                 strncpy(msgBuffer, command, i + 1);
                 i = 0;
@@ -76,11 +93,12 @@ uint8_t BLE_ProcessMsg(char *msgBuffer)
         }
         else if(command[i] == 0)
         {
-          // ignore
+          // Sometimes I receive this zero from
+          // the android app. Haven't figure out why.
+          // For now just ignore, and eveything will be fine.
         }
         else
         {
-            //Serial.println("i++");
             i++;
         }
     }
@@ -89,6 +107,11 @@ uint8_t BLE_ProcessMsg(char *msgBuffer)
 }
 
 
+/******************************************************************************
+ * @brief  Start Advertising
+ * @param  None
+ * @retval None
+ ******************************************************************************/
 void startAdv(void)
 {
     // Advertising packet
@@ -117,7 +140,11 @@ void startAdv(void)
 }
 
 
-// callback invoked when central connects
+/******************************************************************************
+ * @brief  Callback invoked when central connects
+ * @param  conn_handle: BLE handler that is connected
+ * @retval None
+ ******************************************************************************/
 void connect_callback(uint16_t conn_handle)
 {
     // Get the reference to current connection
@@ -131,11 +158,12 @@ void connect_callback(uint16_t conn_handle)
 }
 
 
-/**
- * Callback invoked when a connection is dropped
- * @param conn_handle connection where this event happens
- * @param reason is a BLE_HCI_STATUS_CODE which can be found in ble_hci.h
- */
+/******************************************************************************
+ * @brief  Callback invoked when connection is dropped
+ * @param  conn_handle: BLE handler that is connected
+ *         reason: and the why
+ * @retval None
+ ******************************************************************************/
 void disconnect_callback(uint16_t conn_handle, uint8_t reason)
 {
     (void) conn_handle;

@@ -1,17 +1,20 @@
 /***********************************************************************
  * @file      audio-visualizer.ino
  * @author    Fahad Mirza (fahadmirza8@gmail.com)
- * @version   V02.0
+ * @version   V2.0
  * @brief     Main Application
  ***********************************************************************/
-/*-- Includes ---------------------------------------------------------*/
+/*-- Includes ---------------------------------------------------------*/ 
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 #include "ble.h"
 
+
+/*-- Macros -----------------------------------------------------------*/ 
 #define CMD_BUFFER_SIZE  (25U)
-#define VALID    (1U)
-#define INVALID  (0U)
+#define VALID            (1U)
+#define INVALID          (0U)
+
 
 /*-- Constants --------------------------------------------------------*/
 static const uint8_t PIN_AUDIO_IN = A0;
@@ -19,6 +22,7 @@ static const uint8_t PIN_RESET    = 31;
 static const uint8_t PIN_STROBE   = 11;
 static const uint8_t PIN_NEOPIXEL = 7;
 static const uint8_t LED_COUNT    = 84;
+
 
 /*-- Private typedef --------------------------------------------------*/
 typedef enum eMode
@@ -38,11 +42,14 @@ char CmdBuffer[CMD_BUFFER_SIZE + 1];
 
 Adafruit_NeoPixel Neopixel(LED_COUNT, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
 
+// Initial Application Mode
 eMode_t AppMode = POWER_OFF;
+
 
 /*-- Function definitions ---------------------------------------------*/
 void setup() 
-{    
+{
+    // Config MSGEQ7
     pinMode(PIN_RESET, OUTPUT);
     digitalWrite(PIN_RESET, LOW);
     
@@ -69,6 +76,7 @@ void setup()
 
 void loop() 
 { 
+    // Check if there is any command from BLE
     if(BLE_ProcessMsg(CmdBuffer) == VALID)
     {
         parse_cmd(CmdBuffer);
@@ -88,12 +96,18 @@ void loop()
         }
         default:
         {
+            // Backlight doesn't need continuous execution
             break;
         }
     }
 }
 
 
+/******************************************************************************
+ * @brief  parse the command received from BLE
+ * @param  cmd: pointer of the buffer that holds the command
+ * @retval None
+ ******************************************************************************/
 static void parse_cmd(char *cmd)
 {
     if(strncmp(cmd, "music", strlen("music")) == 0)
@@ -119,9 +133,14 @@ static void parse_cmd(char *cmd)
     }
     else if(strncmp(cmd, "bl", strlen("bl")) == 0)
     {
+        // BackLight mode. The command looks like this
+        // "bl,253,124,78,100" (cmd,r,g,b,brightness)
+
+        // Skip "bl,"
         cmd += 3;
+        
         char *token;
-        char rgb[5];
+        char rgb[5];   // Holder for RGB and brightness
         uint8_t i = 0;
 
         token = strtok(cmd, ",");
@@ -137,8 +156,16 @@ static void parse_cmd(char *cmd)
     }
 }
 
+
+/******************************************************************************
+ * @brief  Turn ON all the LED with one color
+ * @param  32bit color value
+ * @retval None
+ ******************************************************************************/
 void backlight(uint32_t color)
 {
+    // This value is static. So if we press "power on" it will use
+    // whatever color was last used as backlight.
     static uint32_t backlightColor = Neopixel.Color(255, 0, 0);
 
     if(color != 0)
@@ -149,6 +176,12 @@ void backlight(uint32_t color)
     Neopixel.show();
 }
 
+
+/******************************************************************************
+ * @brief  Display audio spectrum on LED strip
+ * @param  None
+ * @retval None
+ ******************************************************************************/
 static void audio_visualizer(void)
 {
     read_MSGEQ7(); 
@@ -156,6 +189,11 @@ static void audio_visualizer(void)
 }
 
 
+/******************************************************************************
+ * @brief  Read MSGEQ7 and populate the global array
+ * @param  None
+ * @retval None
+ ******************************************************************************/
 static void read_MSGEQ7(void)
 {
     digitalWrite(PIN_RESET, HIGH);           // Pulse the reset signal
@@ -174,11 +212,16 @@ static void read_MSGEQ7(void)
 }
 
 
+/******************************************************************************
+ * @brief  Map the audio bands on the LED strip
+ * @param  None
+ * @retval None
+ ******************************************************************************/
 static void graph_bands(void)
 {
     uint8_t mapValue[7];
     
-    for(uint8_t i = 0; i < 7; i++)           // Cycle through all 7 bands
+    for(uint8_t i = 0; i < 7; i++)  // Cycle through all 7 bands
     {
         mapValue[i] = map(Bands[i], 0, 1023, 0, 255);
         if (mapValue[i] < 22)
@@ -222,6 +265,11 @@ static void graph_bands(void)
 }
 
 
+/******************************************************************************
+ * @brief  Execute the rainbow anumation on the LED strip
+ * @param  wait: how long to wait between color transition
+ * @retval None
+ ******************************************************************************/
 // Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
 void rainbow(int wait) 
 {
