@@ -74,7 +74,7 @@
 <layer number="93" name="Pins" color="2" fill="1" visible="no" active="yes"/>
 <layer number="94" name="Symbols" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="95" name="Names" color="51" fill="1" visible="yes" active="yes"/>
-<layer number="96" name="Values" color="57" fill="1" visible="yes" active="yes"/>
+<layer number="96" name="Values" color="51" fill="1" visible="yes" active="yes"/>
 <layer number="97" name="Info" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="98" name="Guide" color="6" fill="1" visible="yes" active="yes"/>
 <layer number="99" name="SpiceOrder" color="7" fill="1" visible="yes" active="yes"/>
@@ -2611,6 +2611,8 @@ Use the atrribute in the schematic editor to change the fields.</description>
 <wire x1="139.7" y1="77.216" x2="139.7" y2="3.81" width="0.1524" layer="94" style="shortdash"/>
 <wire x1="139.7" y1="96.52" x2="260.35" y2="96.52" width="0.1524" layer="94" style="shortdash"/>
 <wire x1="139.7" y1="77.216" x2="3.81" y2="77.216" width="0.1524" layer="94" style="shortdash"/>
+<text x="170.942" y="13.716" size="2.1844" layer="94" font="vector">github.com/mirzafahad/audio_visualizer.git</text>
+<text x="251.46" y="15.24" size="2.54" layer="94" font="vector">1.0</text>
 </plain>
 <instances>
 <instance part="J1" gate="G$1" x="58.42" y="152.4" smashed="yes">
