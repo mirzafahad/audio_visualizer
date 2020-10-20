@@ -11,7 +11,7 @@
 
 
 /*-- Macros -----------------------------------------------------------*/ 
-#define CMD_BUFFER_SIZE  (25U)
+#define BLE_MSG_BUF_SIZE (25U)
 #define VALID            (1U)
 #define INVALID          (0U)
 
@@ -22,6 +22,7 @@ static const uint8_t PIN_RESET    = 31;
 static const uint8_t PIN_STROBE   = 11;
 static const uint8_t PIN_NEOPIXEL = 7;
 static const uint8_t LED_COUNT    = 84;
+static const char* DEVICE_NAME    = "Illuminati";
 
 
 /*-- Private typedef --------------------------------------------------*/
@@ -38,12 +39,12 @@ typedef enum eMode
 /*-- Private variables ------------------------------------------------*/
 // Save all 7 bands value
 static uint32_t Bands[7];
-char CmdBuffer[CMD_BUFFER_SIZE + 1];
-
-Adafruit_NeoPixel Neopixel(LED_COUNT, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
+static char BleBuf[BLE_MSG_BUF_SIZE + 1];
 
 // Initial Application Mode
 eMode_t AppMode = POWER_OFF;
+
+Adafruit_NeoPixel Neopixel(LED_COUNT, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
 
 
 /*-- Function definitions ---------------------------------------------*/
@@ -77,9 +78,9 @@ void setup()
 void loop() 
 { 
     // Check if there is any command from BLE
-    if(BLE_ProcessMsg(CmdBuffer) == VALID)
+    if(BLE_ProcessMsg(BleBuf) == VALID)
     {
-        parse_cmd(CmdBuffer);
+        parse_msg(BleBuf);
     }
 
     switch(AppMode)
@@ -108,30 +109,30 @@ void loop()
  * @param  cmd: pointer of the buffer that holds the command
  * @retval None
  ******************************************************************************/
-static void parse_cmd(char *cmd)
+static void parse_msg(char *msg)
 {
-    if(strncmp(cmd, "music", strlen("music")) == 0)
+    if(strncmp(msg, "music", strlen("music")) == 0)
     {
         Neopixel.setBrightness(255);
         AppMode = MUSIC;
     }
-    else if(strncmp(cmd, "pwroff", strlen("pwroff")) == 0)
+    else if(strncmp(msg, "pwroff", strlen("pwroff")) == 0)
     {
         Neopixel.clear();
         Neopixel.show();
         AppMode = POWER_OFF;
     }
-    else if(strncmp(cmd, "pwron", strlen("pwron")) == 0)
+    else if(strncmp(msg, "pwron", strlen("pwron")) == 0)
     {
         backlight(0); // Whatever last was used
         AppMode = POWER_ON;
     }
-    else if(strncmp(cmd, "rainbow", strlen("rainbow")) == 0)
+    else if(strncmp(msg, "rainbow", strlen("rainbow")) == 0)
     {
         Neopixel.setBrightness(255);
         AppMode = RAINBOW;
     }
-    else if(strncmp(cmd, "bl", strlen("bl")) == 0)
+    else if(strncmp(msg, "bl", strlen("bl")) == 0)
     {
         // BackLight mode. The command looks like this
         // "bl,253,124,78,100" (cmd,r,g,b,brightness)
@@ -143,7 +144,7 @@ static void parse_cmd(char *cmd)
         char rgb[5];   // Holder for RGB and brightness
         uint8_t i = 0;
 
-        token = strtok(cmd, ",");
+        token = strtok(msg, ",");
         while(token != NULL)
         {
             rgb[i++] = strtol(token, NULL, 10);

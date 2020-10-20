@@ -13,7 +13,7 @@
  * @param  None
  * @retval None
  ***********************************************************************/
-void BLE_Init(void);
+void BLE_Init(const char *deviceName);
 
 /******************************************************************************
  * @brief  Process incoming BLE messages

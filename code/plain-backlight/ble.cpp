@@ -44,7 +44,7 @@ void BLE_Init(void)
 
     Bluefruit.begin();
     Bluefruit.setTxPower(4);    // Check bluefruit.h for supported values
-    Bluefruit.setName("Illuminati");
+    Bluefruit.setName("Illuminati-TV");
     Bluefruit.Periph.setConnectCallback(connect_callback);
     Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
     

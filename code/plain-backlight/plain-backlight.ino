@@ -98,17 +98,24 @@ void loop()
         }
         case DARK:
         {
-            delay(1);
-            DarkModeCounter++;
-            if (DarkModeCounter > 30000)
+            if (digitalRead(PIN_PIR) == false)
             {
-                Neopixel.clear();
-                Neopixel.show();
-                LedIsOn = false;
+                delay(1);
+                DarkModeCounter++;
+                if (DarkModeCounter > 30000)
+                {
+                    Neopixel.clear();
+                    Neopixel.show();
+                    LedIsOn = false;
+                    DarkModeCounter = 0;
+                    AppMode = POWER_OFF;
+                    
+                    //digitalWrite(LED_BUILTIN, LOW);
+                }
+            }
+            else
+            {
                 DarkModeCounter = 0;
-                AppMode = POWER_OFF;
-                
-                //digitalWrite(LED_BUILTIN, LOW);
             }
             break;
         }

@@ -33,7 +33,7 @@ void disconnect_callback(uint16_t conn_handle, uint8_t reason);
  * @param  None
  * @retval None
  ***********************************************************************/
-void BLE_Init(void)
+void BLE_Init(const char *deviceName)
 {
     // Setup the BLE LED to be disabled on CONNECT
     Bluefruit.autoConnLed(false);
@@ -44,7 +44,7 @@ void BLE_Init(void)
 
     Bluefruit.begin();
     Bluefruit.setTxPower(4);    // Check bluefruit.h for supported values
-    Bluefruit.setName("Illuminati TV");
+    Bluefruit.setName(deviceName);
     Bluefruit.Periph.setConnectCallback(connect_callback);
     Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
     
