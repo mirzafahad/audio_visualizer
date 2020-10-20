@@ -100,7 +100,7 @@ void loop()
         {
             delay(1);
             DarkModeCounter++;
-            if (DarkModeCounter > 30000 || (read_ldr() >= 100))
+            if (DarkModeCounter > 30000)
             {
                 Neopixel.clear();
                 Neopixel.show();
@@ -119,7 +119,7 @@ void loop()
         }
     }
 
-    if ((digitalRead(PIN_PIR) == true) && (LedIsOn == false) && (read_ldr() <= 20))
+    if ((digitalRead(PIN_PIR) == true) && (LedIsOn == false) && (read_ldr() <= 30))
     {
         Neopixel.setBrightness(255);
         Neopixel.fill(Neopixel.Color(255, 170, 40));
@@ -130,6 +130,8 @@ void loop()
 
         //digitalWrite(LED_BUILTIN, HIGH);
     }
+
+    //Serial.println(read_ldr());
 }
 
 uint32_t read_ldr(void)
