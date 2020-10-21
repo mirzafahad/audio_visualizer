@@ -13,7 +13,7 @@
  * @param  None
  * @retval None
  ***********************************************************************/
-void BLE_Init(const char *deviceName);
+void BLE_init(const char *deviceName);
 
 /******************************************************************************
  * @brief  Process incoming BLE messages
@@ -21,7 +21,7 @@ void BLE_Init(const char *deviceName);
  * @retval VALID: If a complete message is received
  *         INVALID: If not
  ******************************************************************************/
-uint8_t BLE_ProcessMsg(char *msgBuffer);
+uint8_t BLE_process_msg(char *msgBuffer);
 
 
 #endif /* BLE_H__ */

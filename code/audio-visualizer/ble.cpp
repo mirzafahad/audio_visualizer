@@ -1,8 +1,8 @@
 /***********************************************************************
- * @file      ble.cpp
- * @author    Fahad Mirza (fahadmirza8@gmail.com)
- * @version   V02.0
- * @brief     Bluetooth communication module
+ * @file     ble.cpp
+ * @author   Fahad Mirza (fahadmirza8@gmail.com)
+ * @version  V2.0
+ * @brief    Bluetooth communication module
  ***********************************************************************/
 /*-- Includes ---------------------------------------------------------*/
 #include <Arduino.h>
@@ -22,7 +22,7 @@ BLEUart bleuart;
 
 
 /*-- Private functions ------------------------------------------------*/
-void startAdv(void);
+void start_adv(void);
 void connect_callback(uint16_t conn_handle);
 void disconnect_callback(uint16_t conn_handle, uint8_t reason);
 
@@ -33,10 +33,11 @@ void disconnect_callback(uint16_t conn_handle, uint8_t reason);
  * @param  None
  * @retval None
  ***********************************************************************/
-void BLE_Init(const char *deviceName)
+void BLE_init(const char *deviceName)
 {
     // Setup the BLE LED to be disabled on CONNECT
     Bluefruit.autoConnLed(false);
+    
     // Config the peripheral connection with maximum bandwidth 
     // more SRAM required by SoftDevice
     // Note: All config***() function must be called before begin()
@@ -52,7 +53,7 @@ void BLE_Init(const char *deviceName)
     bleuart.begin();
 
     // Set up and start advertising
-    startAdv();
+    start_adv();
 
     Serial.println("Ready");
 }
@@ -64,20 +65,20 @@ void BLE_Init(const char *deviceName)
  * @retval VALID: If a complete message is received
  *         INVALID: If not
  ******************************************************************************/
-uint8_t BLE_ProcessMsg(char *msgBuffer)
+uint8_t BLE_process_msg(char *msgBuffer)
 {
     static char command[BLE_BUFFER_SIZE + 1];
     static uint8_t i = 0;
 
     // Check if any BLE msg is available to read
-    while(bleuart.available())
+    while (bleuart.available())
     {
         command[i] = (uint8_t)bleuart.read();
         //Serial.print(command[i]);
         
-        if(command[i] == '\n') // End of the message
+        if (command[i] == '\n') // End of the message
         {
-            if(i != 0)
+            if (i != 0)
             {
                 // Null terminating the msg
                 command[i] = '\0';
@@ -86,12 +87,12 @@ uint8_t BLE_ProcessMsg(char *msgBuffer)
                 return VALID;
             }
         }    
-        else if(i == BLE_BUFFER_SIZE)
+        else if (i == BLE_BUFFER_SIZE)
         {
             Serial.print("overflow");
             i = 0;
         }
-        else if(command[i] == 0)
+        else if (command[i] == 0)
         {
           // Sometimes I receive this zero from
           // the android app. Haven't figure out why.
@@ -112,7 +113,7 @@ uint8_t BLE_ProcessMsg(char *msgBuffer)
  * @param  None
  * @retval None
  ******************************************************************************/
-void startAdv(void)
+void start_adv(void)
 {
     // Advertising packet
     Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
@@ -170,5 +171,6 @@ void disconnect_callback(uint16_t conn_handle, uint8_t reason)
     (void) reason;
 
     Serial.println();
-    Serial.print("Disconnected, reason = 0x"); Serial.println(reason, HEX);
+    Serial.print("Disconnected, reason = 0x"); 
+    Serial.println(reason, HEX);
 }
