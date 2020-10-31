@@ -4,6 +4,6 @@ A simple WS2812 LED Strip based backlight and audio visualizer using Adafruit nr
 
 More can be found [here](https://mirzafahad.github.io/2020-07-13-audio-visualizer/).
 
-![model block diagram](/image/app.png)
+![App Interface](/image/app.png)
 
-![model block diagram](/image/demo.png)
+![LEDs in action](/image/demo.png)

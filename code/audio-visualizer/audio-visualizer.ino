@@ -176,7 +176,7 @@ void backlight(uint32_t color)
 {
     // This value is static. So if we press "power on" it will use
     // whatever color was last used as backlight.
-    static uint32_t backlightColor = Neopixel.Color(255, 0, 0);
+    static uint32_t backlightColor = Neopixel.Color(255, 255, 255);
 
     if (color != 0)
     {
