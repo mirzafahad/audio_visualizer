@@ -6,14 +6,14 @@ A simple WS2812 LED Strip based backlight and audio visualizer using [Adafruit n
 
 More can be found [here](https://mirzafahad.github.io/2020-07-13-audio-visualizer/).
 
-Backlight in action:
+Backlight in action:  
 ![Backlight in action](/image/visualizer.gif)
 
-Motion Detection:
+Motion Detection:  
 ![Motion Detection](/image/motion-detection.gif)
 
-Android App:
+Android App:  
 ![App Interface](/image/app.png)
 
-Hardware:
-![Hardware](/image/pcb2.jpg)
+Hardware:  
+![Hardware](/image/pcb.jpg)
