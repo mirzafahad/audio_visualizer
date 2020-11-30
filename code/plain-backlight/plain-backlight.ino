@@ -71,7 +71,7 @@ void setup()
     // Config PIR
     pinMode(PIN_PIR, INPUT);
     
-    Serial.begin(9600);
+    Serial.begin(115200);
 
 #ifdef DEBUG
     // Blocking wait for connection when debug mode is enabled via IDE
@@ -126,6 +126,8 @@ void loop()
         }
     }
 
+    //Serial.printf("P:%d\tD:%ld\n", digitalRead(PIN_PIR), DarkModeCounter);
+
     if ((digitalRead(PIN_PIR) == true) && (LedIsOn == false) && (read_ldr() <= 30))
     {
         Neopixel.setBrightness(255);
@@ -138,7 +140,6 @@ void loop()
         //digitalWrite(LED_BUILTIN, HIGH);
     }
 
-    //Serial.println(read_ldr());
 }
 
 uint32_t read_ldr(void)
