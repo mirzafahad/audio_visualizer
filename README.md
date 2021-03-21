@@ -2,6 +2,8 @@
 [![License](https://img.shields.io/badge/license-MIT-red)](https://opensource.org/licenses/MIT)
 [![Blog](https://img.shields.io/badge/blog-post-yellow)](https://mirzafahad.github.io/2020-07-13-audio-visualizer/)
 
+:star: Star me on GitHub — it helps!
+
 A simple WS2812 LED Strip based backlight and audio visualizer using [Adafruit nrf52832 Feather](https://www.adafruit.com/product/3406). You can control the color and modes using an Android App. 
 
 More can be found [here](https://mirzafahad.github.io/2020-07-13-audio-visualizer/).
