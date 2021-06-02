@@ -25,6 +25,7 @@ static const uint8_t PIN_STROBE   = 11;
 static const uint8_t PIN_NEOPIXEL = 7;
 static const uint8_t PIN_PIR      = 27;
 static const uint8_t LED_COUNT    = 77;
+static const uint8_t PIN_TV       = A4;
 
 
 
@@ -33,6 +34,7 @@ typedef enum eMode
 {
     POWER_ON = 0,
     POWER_OFF,
+    TV_ON,
     RAINBOW,
     BACKLIGHT,
     DARK
@@ -140,6 +142,30 @@ void loop()
         //digitalWrite(LED_BUILTIN, HIGH);
     }
 
+    if (is_tv_on() && (LedIsOn == false))
+    {
+        backlight(0); // Whatever last was used
+        LedIsOn = true;
+        AppMode = TV_ON;
+    }
+    else if ((is_tv_on() == false) && (AppMode == TV_ON))
+    {
+        Neopixel.clear();
+        Neopixel.show();
+        LedIsOn = false;
+        AppMode = POWER_OFF;
+    }
+
+}
+
+bool is_tv_on(void)
+{
+    if (analogRead(PIN_TV) > 400)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 uint32_t read_ldr(void)
@@ -207,7 +233,11 @@ static void parse_cmd(char *cmd)
         Neopixel.setBrightness(rgb[3]);
         backlight(Neopixel.Color(rgb[0], rgb[1], rgb[2]));
         LedIsOn = true;
-        AppMode = BACKLIGHT;
+
+        if (AppMode != TV_ON)
+        {
+            AppMode = BACKLIGHT;
+        }
     }
 }
 
