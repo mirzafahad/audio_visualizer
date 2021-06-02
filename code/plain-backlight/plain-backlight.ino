@@ -24,8 +24,9 @@ static const uint8_t PIN_RESET    = 31;
 static const uint8_t PIN_STROBE   = 11;
 static const uint8_t PIN_NEOPIXEL = 7;
 static const uint8_t PIN_PIR      = 27;
-static const uint8_t LED_COUNT    = 77;
 static const uint8_t PIN_TV       = A4;
+
+static const uint8_t LED_COUNT    = 108;
 
 
 
@@ -55,13 +56,6 @@ eMode_t AppMode = POWER_OFF;
 /*-- Function definitions ---------------------------------------------*/
 void setup() 
 {
-    // Config MSGEQ7
-    pinMode(PIN_RESET, OUTPUT);
-    digitalWrite(PIN_RESET, LOW);
-    
-    pinMode(PIN_STROBE, OUTPUT);
-    digitalWrite(PIN_STROBE, HIGH);
-
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);
 
@@ -104,7 +98,7 @@ void loop()
             {
                 delay(1);
                 DarkModeCounter++;
-                if (DarkModeCounter > 30000)
+                if (DarkModeCounter > 60000)
                 {
                     Neopixel.clear();
                     Neopixel.show();
@@ -172,14 +166,14 @@ uint32_t read_ldr(void)
 {
     uint32_t sensorValueSum = 0;
 
-    for(int i = 0; i < 100; i++)
+    for(int i = 0; i < 50; i++)
     {    
         sensorValueSum += analogRead(PIN_LDR);
     }
     
-    uint32_t sensorValueAvg = sensorValueSum / 100;
+    uint32_t sensorValueAvg = sensorValueSum / 50;
 
-    Serial.println(sensorValueAvg);
+    //Serial.println(sensorValueAvg);
     
     return sensorValueAvg;
 }
@@ -251,7 +245,7 @@ void backlight(uint32_t color)
 {
     // This value is static. So if we press "power on" it will use
     // whatever color was last used as backlight.
-    static uint32_t backlightColor = Neopixel.Color(255, 255, 255);
+    static uint32_t backlightColor = Neopixel.Color(0, 0, 255);
 
     if(color != 0)
     {
@@ -263,7 +257,7 @@ void backlight(uint32_t color)
 
 
 /******************************************************************************
- * @brief  Execute the rainbow anumation on the LED strip
+ * @brief  Execute the rainbow animation on the LED strip
  * @param  wait: how long to wait between color transition
  * @retval None
  ******************************************************************************/
